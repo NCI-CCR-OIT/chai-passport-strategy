@@ -9,7 +9,9 @@ Helpers for testing [Passport](https://www.passportjs.org/) strategies with the
 
 ## Usage
 
-#### Use Plugin
+### Use Plugin
+
+#### Chai v4/CommonJS
 
 Use this plugin as you would all other Chai plugins:
 
@@ -19,10 +21,29 @@ var chai = require('chai');
 chai.use(require('chai-passport-strategy'));
 ```
 
-#### Implement Test Cases
+#### Chai v5/ESM
 
-Once used, the `chai.passport.use` helper function will be available to set up
-a test case which places a Passport strategy under test.
+Chai 5 now solely supports ESM (Ecmascript Modules) and its `import` method
+of loading; as part of the change, Chai also no longer supports a global `chai`
+object, meaning that you can no longer access `chai.passport` directly.
+
+Instead, the new Chai v5 exported `use` function returns the entire `chai`
+object with each call, and that's where you can then get access to the
+`passport` object that `chai-passport-strategy` attaches when it initializes.
+
+```javascript
+import { use } from 'chai';
+import chaiPassportStrategy from 'chai-passport-strategy';
+
+const { passport } = use(chaiPassportStrategy);
+```
+
+### Implement Test Cases
+
+Once used, a helper function will be available to set up a test case which
+places a Passport strategy under test; with Chai v4/CommonJS, the function is
+available at `chai.passport.use`, and with Chai v5/ESM, the function is
+available as `passport.use`.
 
 The helper returns a wrapper on which callbacks are registered to be executed
 when the strategy invokes its final action function.  The callbacks correspond
@@ -30,8 +51,8 @@ to Passport's strategy API: `success()`, `fail()`, `redirect()`, `pass()`, and
 `error()`.  If the strategy invokes an action that doesn't have a registered
 callback, the test helper will automatically throw an exception.
 
-For example, a [Mocha](https://mochajs.org/) test case that tests a strategy
-which implements bearer token authentication:
+For example, a Chai v4/CommonJS [Mocha](https://mochajs.org/) test case that
+tests a strategy which implements bearer token authentication:
 
 
 ```javascript
